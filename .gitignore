@@ -56,6 +56,5 @@ mobile-hero.png
 # Root-level verification screenshots (rt-*, menu-*, resp-*, fix-*, chip*, etc.)
 /*.png
 
-# Playwright e2e output
-playwright-report/
-test-results/
+# Local uploads (fallback when BLOB_READ_WRITE_TOKEN is not configured)
+/public/uploads/

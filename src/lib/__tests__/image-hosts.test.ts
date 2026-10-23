@@ -22,8 +22,15 @@ describe("isAllowedImageHost", () => {
     expect(isAllowedImageHost("https://notaryanshgupta.runs-on.dev/a.png")).toBe(false);
   });
 
-  it("rejects a non-URL", () => {
+  it("accepts local paths starting with /", () => {
+    expect(isAllowedImageHost("/uploads/avatar/x.webp")).toBe(true);
+    expect(isAllowedImageHost("/images/avatar.png")).toBe(true);
+  });
+
+  it("rejects a non-URL and hostile paths", () => {
     expect(isAllowedImageHost("not a url")).toBe(false);
+    expect(isAllowedImageHost("//evil.com/x.png")).toBe(false);
+    expect(isAllowedImageHost("javascript:alert(1)")).toBe(false);
   });
 
   // Drift guard: the list above is a hand copy, so pin it to the real config.

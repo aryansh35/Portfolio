@@ -2,16 +2,42 @@ import { z } from "zod";
 
 // ---------- Table insert/update validators (admin form input) ----------
 
+// Safe image path/URL validator: accepts http(s) URLs or local root paths (/...)
+// while strictly rejecting hostile schemes like javascript:, data:, vbscript:, etc.
+export const isSafeImagePath = (v: string): boolean => {
+  if (typeof v !== "string") return false;
+  const s = v.trim();
+  if (!s) return false;
+  if (s.startsWith("/")) {
+    return !s.startsWith("//") && !s.includes(":");
+  }
+  try {
+    const u = new URL(s);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+export const imagePathSchema = z.string().trim().refine(isSafeImagePath, {
+  message: "Must be a valid http(s) URL or local path starting with /",
+});
+
 export const profileInsertSchema = z.object({
   name: z.string().min(1),
   bio: z.string().min(1),
   stats: z.record(z.string(), z.union([z.string(), z.number()])).default({}),
   roles: z.array(z.string()).default([]),
-  // Full http(s) URLs only — z.httpUrl() rejects javascript:/data: schemes
-  // (the resume renders as <a href>, the avatar as <img src>). Store the
-  // absolute asset URL, not a relative path.
-  resumeUrl: z.httpUrl().nullable().optional(),
-  avatarUrl: z.httpUrl().nullable().optional(),
+  resumeUrl: z
+    .union([imagePathSchema, z.literal(""), z.null()])
+    .transform((v) => (v === "" ? null : v))
+    .nullable()
+    .optional(),
+  avatarUrl: z
+    .union([imagePathSchema, z.literal(""), z.null()])
+    .transform((v) => (v === "" ? null : v))
+    .nullable()
+    .optional(),
   heroTagline: z.string().nullable().optional(),
   sectionVisibility: z.record(z.string(), z.boolean()).default({}),
 });
@@ -27,15 +53,12 @@ export const projectInsertSchema = z.object({
   featured: z.boolean().default(false),
   order: z.number().int().nonnegative().default(0),
   hidden: z.boolean().default(false),
-  // Quick-view media. httpUrl() not string().url(), matching the fields above: string().url()
-  // accepts javascript: and data:, which these reach an <img src> as. An empty string from a
-  // cleared upload field becomes null rather than failing.
   coverImage: z
-    .union([z.httpUrl(), z.literal(""), z.null()])
+    .union([imagePathSchema, z.literal(""), z.null()])
     .transform((v) => (v === "" ? null : v))
     .nullable()
     .optional(),
-  screenshots: z.array(z.httpUrl()).max(6).default([]),
+  screenshots: z.array(imagePathSchema).max(6).default([]),
 });
 
 export const experienceInsertSchema = z.object({

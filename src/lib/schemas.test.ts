@@ -31,6 +31,15 @@ describe("projectInsertSchema media URLs", () => {
     expect(r.success).toBe(true);
   });
 
+  it("accepts local paths starting with /", () => {
+    const r = projectInsertSchema.safeParse({
+      ...base,
+      coverImage: "/uploads/projects/cover.webp",
+      screenshots: ["/uploads/projects/1.webp", "/images/screenshot.png"],
+    });
+    expect(r.success).toBe(true);
+  });
+
   it("treats a cleared upload field as null rather than failing", () => {
     const r = projectInsertSchema.safeParse({ ...base, coverImage: "" });
     expect(r.success).toBe(true);

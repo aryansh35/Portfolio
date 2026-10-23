@@ -21,11 +21,17 @@ function hostMatches(hostname: string, pattern: string): boolean {
 /**
  * Whether next/image will actually serve this URL. An admin can paste any https URL, and an
  * unlisted host renders fine in the `unoptimized` admin preview while the public page shows nothing.
+ * Local root-relative paths (e.g. /uploads/... or /images/...) are served directly by Next.js.
  */
 export function isAllowedImageHost(url: string): boolean {
+  if (typeof url !== "string") return false;
+  const s = url.trim();
+  if (s.startsWith("/")) {
+    return !s.startsWith("//") && !s.includes(":");
+  }
   let hostname: string;
   try {
-    hostname = new URL(url).hostname;
+    hostname = new URL(s).hostname;
   } catch {
     return false;
   }
