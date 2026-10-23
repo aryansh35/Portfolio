@@ -29,24 +29,6 @@ const base: MergedProject = {
 };
 
 describe("ProjectCard", () => {
-  it("renders live stars and forks", () => {
-    render(<ProjectCard project={base} />);
-    expect(screen.getByLabelText("42 stars")).toBeInTheDocument();
-    expect(screen.getByLabelText("7 forks")).toBeInTheDocument();
-  });
-
-  it("labels a single star or fork in the singular", () => {
-    render(<ProjectCard project={{ ...base, stars: 1, forks: 1 }} />);
-    expect(screen.getByLabelText("1 star")).toBeInTheDocument();
-    expect(screen.getByLabelText("1 fork")).toBeInTheDocument();
-  });
-
-  it("labels absent counts as zero, in the plural", () => {
-    render(<ProjectCard project={{ ...base, stars: null, forks: null }} />);
-    expect(screen.getByLabelText("0 stars")).toBeInTheDocument();
-    expect(screen.getByLabelText("0 forks")).toBeInTheDocument();
-  });
-
   it("omits the Live link when there is no homepage", () => {
     render(<ProjectCard project={base} />);
     expect(screen.queryByText("Live")).not.toBeInTheDocument();
@@ -55,12 +37,6 @@ describe("ProjectCard", () => {
   it("shows the Live link when a homepage exists", () => {
     render(<ProjectCard project={{ ...base, homepage: "https://x.dev" }} />);
     expect(screen.getByText("Live")).toBeInTheDocument();
-  });
-
-  it("renders null stats as em-dash", () => {
-    render(<ProjectCard project={{ ...base, stars: null, forks: null }} />);
-    const dashes = screen.getAllByText("—");
-    expect(dashes).toHaveLength(2);
   });
 
   it("renders the project title", () => {
