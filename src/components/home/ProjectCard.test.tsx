@@ -25,6 +25,7 @@ const base: MergedProject = {
   htmlUrl: "https://github.com/aryansh35/rippl",
   coverImage: null,
   screenshots: [],
+  liveUrl: null,
   readmeExcerpt: null,
 };
 

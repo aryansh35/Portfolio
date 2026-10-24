@@ -48,6 +48,7 @@ export const projects = pgTable("projects", {
   // falls back to a generated gradient when coverImage is null, so this stays optional.
   coverImage: text("cover_image"),
   screenshots: jsonb("screenshots").$type<string[]>().notNull().default([]),
+  liveUrl: text("live_url"),
 });
 
 export const experiences = pgTable("experiences", {

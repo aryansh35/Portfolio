@@ -59,6 +59,11 @@ export const projectInsertSchema = z.object({
     .nullable()
     .optional(),
   screenshots: z.array(imagePathSchema).max(6).default([]),
+  liveUrl: z
+    .union([imagePathSchema, z.literal(""), z.null()])
+    .transform((v) => (v === "" ? null : v))
+    .nullable()
+    .optional(),
 });
 
 export const experienceInsertSchema = z.object({

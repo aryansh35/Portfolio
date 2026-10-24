@@ -34,6 +34,9 @@ function curation(p: Partial<Project> & { repo: string }): Project {
     featured: false,
     order: 0,
     hidden: false,
+    coverImage: null,
+    screenshots: [],
+    liveUrl: null,
     ...p,
   } as Project;
 }
@@ -103,6 +106,18 @@ describe("mergeProjects", () => {
     );
     expect(out.find((p) => p.repo === "a")?.description).toBe("Custom");
     expect(out.find((p) => p.repo === "b")?.description).toBe("b desc");
+  });
+
+  it("prefers liveUrl over github homepage, falls back when null", () => {
+    const out = mergeProjects(
+      [curation({ repo: "a", liveUrl: "https://custom-demo.com" }), curation({ repo: "b" })],
+      [
+        { ...repo("a", 0), homepage: "https://gh-page-a.com" },
+        { ...repo("b", 0), homepage: "https://gh-page-b.com" },
+      ],
+    );
+    expect(out.find((p) => p.repo === "a")?.homepage).toBe("https://custom-demo.com");
+    expect(out.find((p) => p.repo === "b")?.homepage).toBe("https://gh-page-b.com");
   });
 
   it("yields null live stats when the repo is missing from github", () => {

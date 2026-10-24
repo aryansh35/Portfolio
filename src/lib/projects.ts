@@ -36,7 +36,7 @@ export function mergeProjects(
         forks: live ? live.forks_count : null,
         language,
         description: c.customBlurb ?? (live ? live.description : null),
-        homepage: live ? live.homepage : null,
+        homepage: c.liveUrl || (live ? live.homepage : null),
         htmlUrl: live ? live.html_url : null,
         readmeExcerpt: readmeExcerpts.get(c.repo.toLowerCase()) ?? null,
       };

@@ -44,6 +44,13 @@ const fields: AdminField[] = [
       "on a host in next.config.js remotePatterns.",
   },
   {
+    name: "liveUrl",
+    label: "Live URL",
+    type: "url",
+    placeholder: "https://my-project.com",
+    hint: "Optional URL for the live site or demo. When set, renders the 'Live' button.",
+  },
+  {
     name: "order",
     label: "Order",
     type: "number",
@@ -79,6 +86,7 @@ function parse(formData: FormData) {
     hidden: formData.get("hidden") === "on",
     coverImage: (formData.get("coverImage") as string) || null,
     screenshots: parseScreenshots(formData.get("screenshots")),
+    liveUrl: (formData.get("liveUrl") as string) || null,
   };
 }
 
