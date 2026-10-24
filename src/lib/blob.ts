@@ -59,6 +59,11 @@ export async function optimizeAndUploadImage(
 
   const key = `${folder}/${crypto.randomUUID()}.webp`;
   if (!process.env.BLOB_READ_WRITE_TOKEN && process.env.NODE_ENV !== "test") {
+    if (process.env.VERCEL) {
+      throw new Error(
+        "Vercel Blob is not connected. In Vercel Dashboard -> Storage -> create a Blob store and connect it, or paste an image URL below.",
+      );
+    }
     const fs = await import("node:fs/promises");
     const path = await import("node:path");
     const dir = path.join(process.cwd(), "public", "uploads", folder);
@@ -80,6 +85,11 @@ export async function optimizeAndUploadImage(
 async function putRawSvg(file: File, folder: BlobFolder): Promise<string> {
   const buf = Buffer.from(await file.arrayBuffer());
   if (!process.env.BLOB_READ_WRITE_TOKEN && process.env.NODE_ENV !== "test") {
+    if (process.env.VERCEL) {
+      throw new Error(
+        "Vercel Blob is not connected. In Vercel Dashboard -> Storage -> create a Blob store and connect it, or paste an image URL below.",
+      );
+    }
     const fs = await import("node:fs/promises");
     const path = await import("node:path");
     const dir = path.join(process.cwd(), "public", "uploads", folder);
