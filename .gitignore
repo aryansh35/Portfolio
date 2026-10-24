@@ -58,3 +58,6 @@ mobile-hero.png
 
 # Local uploads (fallback when BLOB_READ_WRITE_TOKEN is not configured)
 /public/uploads/
+
+# Tool configurations
+.claude/

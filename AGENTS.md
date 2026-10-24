@@ -1,8 +1,6 @@
-# AI Agent Guidelines
+# Architecture & Engineering Guidelines
 
-Last updated: 2026-08-17
-
-The working-discipline and multi-agent-safety rules that used to live here were a verbatim copy of `~/.claude/CLAUDE.md`, which is already loaded into every session. They were deleted rather than maintained in two places. This file now carries only what is true of **this repo** and cannot be derived from reading it quickly.
+This document records the architectural decisions, constraints, and conventions of **this repo**.
 
 ---
 
@@ -42,7 +40,7 @@ src/lib/seo/site.ts      SITE constants (canonical URL, title, description)
 
 ## Things that will bite you
 
-1. **The build is `next build --webpack`, not Turbopack, and that is deliberate.** `sharp` is a native addon used server-side for image optimisation; Turbopack rewrites it into a hashed external module Vercel cannot `dlopen`. `next.config.js` also marks it in `serverExternalPackages`. Do not "modernise" the build script - see commits `9e79c27` and `fc7bb71`, which exist because this was broken in production twice. `bun run dev` still uses Turbopack, which is fine.
+1. **The build is `next build --webpack`, not Turbopack, and that is deliberate.** `sharp` is a native addon used server-side for image optimisation; Turbopack rewrites it into a hashed external module Vercel cannot `dlopen`. `next.config.js` also marks it in `serverExternalPackages`. Do not change the build script: `bun run dev` still uses Turbopack, which is fine.
 
 2. **The homepage is ISR-prerendered at build time, so a build needs a reachable, migrated, seeded database.** `src/app/page.tsx` queries Postgres during prerender. This is why CI stands up a Postgres service and runs `drizzle-kit migrate` + `db:seed` **before** `bun run build`, and why a build with no `DATABASE_URL` fails in a way that looks unrelated to the database.
 
@@ -52,7 +50,7 @@ src/lib/seo/site.ts      SITE constants (canonical URL, title, description)
 
 4. **The `@theme` -> `:root`/`.dark` indirection in `globals.css` is load-bearing.** Tailwind v4 only generates opacity modifiers (`/40`, `/[0.02]`) for colours registered as `--color-*` in `@theme`, but `@theme` cannot hold theme-switched values. So `@theme` declares `--color-surface: var(--surface)` and the raw value flips in `:root`/`.dark`. Swapping colour *values* is safe; restructuring this pattern silently kills every `border-(--brand-deep)/40` in the codebase.
 
-   The default palette lives in **`src/lib/brand.ts`**, the build-time source of truth. `globals.css` mirrors it by hand because CSS cannot import TypeScript, and `src/app/globals.theme.test.ts` derives its expectations from `brand.ts` to assert the mirror still holds - so a colour change fails the suite until both are updated. Token names are hue-neutral (`deep`/`mid`/`bright`) because the old `violet`/`cyan`/`pink` names stopped being true at the Glacier rebrand and would be wrong again on any future palette.
+   The default palette lives in **`src/lib/brand.ts`**, the build-time source of truth. `globals.css` mirrors it by hand because CSS cannot import TypeScript, and `src/app/globals.theme.test.ts` derives its expectations from `brand.ts` to assert the mirror still holds - so a colour change fails the suite until both are updated. Token names are hue-neutral (`deep`/`mid`/`bright`) so they remain semantically accurate across any brand palette.
 
 5. **There are two colour sources, and which one to use is a real decision.** Visitors can pick a brand palette at runtime (`src/hooks/usePalette.ts`, applied as `data-palette` on `<html>`, with `[data-palette]` blocks in `globals.css`). That splits colour consumers in two:
 
@@ -104,7 +102,7 @@ bun run build        # production build
 ## Conventions
 
 - Prettier owns formatting - double quotes, semicolons, trailing commas, 100-column lines, 2-space indent. Do not hand-format; run `bun run format`.
-- Conventional Commits per the repo's own `.gitmessage`, which is authoritative: imperative subject `<=` 50 chars, no trailing period, body bullets starting `- ` wrapped at 72. It says explicitly **never** to add `Generated with Claude Code`, `Co-Authored-By`, or author trailers, and no commit in this repo's history has one. `.claude/settings.json` sets `includeCoAuthoredBy: false` to match.
+- Conventional Commits: imperative subject `<=` 50 chars, no trailing period, body bullets starting `- ` wrapped at 72. Never add author trailers.
 - **Never use em-dashes.** Use a hyphen instead. This applies to code comments, commit messages, and prose.
 - Markdown prose is never hard-wrapped: one line per paragraph and per list item. Do not re-wrap these files to a column.
 - The PR title becomes the squash commit message. `master` is protected: PR required, squash-only merges, admins may self-merge.
